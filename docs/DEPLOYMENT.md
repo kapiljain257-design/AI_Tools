@@ -26,7 +26,7 @@
 ### Data & Persistence
 - **MongoDB** - Optional document database for each microservice
 - **Mongoose** - ORM for MongoDB (can be added per service)
-- **Environment variables** - MONGODB_URI, PORT configuration
+- **Environment variables** - `MONGODB_URI`, `PORT`, `PYTHON_EXECUTABLE` configuration
 
 ---
 
@@ -55,6 +55,7 @@
 | **Perfectto** | 5004 | `PORT=5004` |
 | **Repro Tool** | 5005 | `PORT=5005` |
 | **MongoDB** | 27017 | `MONGODB_URI=mongodb://localhost:27017` |
+| **Python** | - | `PYTHON_EXECUTABLE=python3` |
 | **Frontend (React)** | 3001 | Development server |
 
 ---
@@ -130,8 +131,11 @@ Create `.env` files in each service (optional):
 ```env
 PORT=5001
 MONGODB_URI=mongodb://localhost:27017/nova
+PYTHON_EXECUTABLE=python3
 NODE_ENV=development
 ```
+
+Backend tool services now import shared runtime configuration from `backend/shared/toolConfig.js`, including `MONGODB_URI`, `PYTHON_EXECUTABLE`, default ports, and Python script locations. Override the Python runtime by setting `PYTHON_EXECUTABLE` in the service environment.
 
 **API Gateway** (`backend/api-gateway/.env`):
 ```env

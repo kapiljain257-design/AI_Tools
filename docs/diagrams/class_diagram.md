@@ -187,10 +187,24 @@ classDiagram
         +API_ENDPOINTS: Map
     }
 
+    class ToolConfig {
+        -configPath: string
+        -MONGODB_URI: string
+        -PYTHON_EXECUTABLE: string
+        -SERVICE_DEFINITIONS: object
+        +load()
+        +getToolConfig(toolId)
+    }
+
     APIGateway --> Constants
     APIGateway --> Tool
-    
+
     Tool <|-- NovaService
+    NovaService --> ToolConfig
+    ImageGeneratorService --> ToolConfig
+    IndustReportService --> ToolConfig
+    PerfectoService --> ToolConfig
+    ReproToolService --> ToolConfig
     Tool <|-- ImageGeneratorService
     Tool <|-- IndustReportService
     Tool <|-- PerfectoService

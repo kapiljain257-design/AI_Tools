@@ -1,16 +1,29 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const { execFile } = require('child_process');
+const { MONGODB_URI, MONGO_OPTIONS, PYTHON_EXECUTABLE, SERVICE_DEFINITIONS, SUPPORT } = require('../shared/toolConfig');
+
+const serviceKey = 'translator';
+const serviceConfig = SERVICE_DEFINITIONS[serviceKey];
 
 const config = {
-  toolId: 'translator',
-  port: process.env.PORT || 5001,
-  mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/microservice_tools',
-  messages: {
-    start: 'Translator service started',
-    process: 'Translating prompt to Pig Latin'
-  }
+  toolId: serviceConfig.toolId,
+  port: process.env.PORT || serviceConfig.defaultPort,
+  mongoUri: MONGODB_URI,
+  pythonScript: serviceConfig.pythonScript,
+  messages: serviceConfig.messages
 };
+
+const executePythonTool = (scriptPath, username, apiKey, prompt) => new Promise((resolve, reject) => {
+  const args = ['--username', username, '--api_key', apiKey, '--prompt', prompt];
+  execFile(PYTHON_EXECUTABLE, [scriptPath, ...args], { timeout: 15000 }, (error, stdout, stderr) => {
+    if (error) {
+      return reject(new Error(stderr.toString().trim() || error.message));
+    }
+    return resolve(stdout.toString().trim());
+  });
+});
 
 const app = express();
 app.use(cors());
@@ -21,7 +34,7 @@ app.use((req, res, next) => {
   next();
 });
 
-mongoose.connect(config.mongoUri, { serverSelectionTimeoutMS: 3000, connectTimeoutMS: 3000 })
+mongoose.connect(config.mongoUri, MONGO_OPTIONS)
   .then(() => console.info(`[${config.toolId}] Connected to MongoDB`))
   .catch(err => console.warn(`[${config.toolId}] MongoDB connection error (non-blocking): ${err.message}`));
 
@@ -48,17 +61,18 @@ app.get('/health', (req, res) => {
 });
 
 app.post('/process', async (req, res) => {
-  const { prompt = '' } = req.body;
+  const { prompt = '', username = 'anonymous', apiKey = '' } = req.body;
   console.info(`[${config.toolId}] ${config.messages.process}`, prompt);
 
-  const result = prompt
-    .split(' ')
-    .map(w => (w.length > 0 ? `${w.slice(1)}${w[0]}ay` : ''))
-    .join(' ');
-
-  logToolUsage(prompt, result);
-
-  res.json({ result });
+  try {
+    const result = await executePythonTool(config.pythonScript, username, apiKey, prompt);
+    logToolUsage(prompt, result);
+    res.json({ result });
+  } catch (err) {
+    console.error(`[${config.toolId}] Python tool error`, err.message);
+    logToolUsage(prompt, `ERROR: ${err.message}`);
+    res.status(500).json({ error: SUPPORT.proxyError, details: err.message });
+  }
 });
 
 app.listen(config.port, () => console.log(`[${config.toolId}] ${config.messages.start} on ${config.port}`));

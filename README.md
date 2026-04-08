@@ -23,7 +23,8 @@ A full-stack microservices architecture providing a React dashboard for AI-power
     - `perfectto/PerfectoInterface.js` - Content optimization interface
     - `repro-tool/ReproToolInterface.js` - Issue tracking and report submission
 
-> Each microservice can implement MongoDB operations via Mongoose in their own `index.js`
+> Each microservice can implement MongoDB operations via Mongoose in their own `index.js`.
+> Shared backend configuration is now centralized in `backend/shared/toolConfig.js`, including `MONGODB_URI`, `PYTHON_EXECUTABLE`, tool service ports, and Python helper script paths.
 
 ---
 
@@ -116,7 +117,8 @@ The application will be available at `http://localhost:3001`
    - If inactive: User sees maintenance message with support contact
 4. **Processing**: Submit sends request to `/api/tools/:id/process`
 5. **Proxy**: API Gateway proxies request to appropriate microservice
-6. **Response**: Result displayed in tool-specific interface component
+6. **Shared Config**: Tool services resolve `MONGODB_URI`, `PYTHON_EXECUTABLE`, and Python helper paths from `backend/shared/toolConfig.js`
+7. **Response**: Result displayed in tool-specific interface component
 
 ### Component Architecture
 - **Generic Flow**: App.js → ToolInterface.js → Conditional routing

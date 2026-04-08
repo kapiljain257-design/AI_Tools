@@ -101,7 +101,8 @@ cd ../..
 ### 4. Configure MongoDB
 - Ensure MongoDB is running on your system
 - Default connection: `mongodb://localhost:27017/microservice_tools`
-- If using MongoDB Atlas, update the `MONGODB_URI` environment variable in `backend/image-generator/index.js`
+- If using MongoDB Atlas, update the `MONGODB_URI` environment variable in `backend/shared/toolConfig.js` or in the service-specific `.env` file
+- The default Python executable is `python3`; override it with `PYTHON_EXECUTABLE=python` or the full path to your Python interpreter if needed
 
 ### 5. Start the Services
 

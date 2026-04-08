@@ -80,7 +80,8 @@ sequenceDiagram
     Note over State,Gateway: Body: {type, prompt}
     
     Gateway->>Tool: 8. Proxy to:<br/>http://localhost:5001/process
-    
+
+    Note over Tool: Uses shared backend config from<br/>backend/shared/toolConfig.js for `PYTHON_EXECUTABLE` and tool script paths
     Tool->>Tool: 9. Process input<br/>based on type
     opt If using MongoDB
         Tool->>DB: 10. Store result/log
