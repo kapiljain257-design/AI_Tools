@@ -41,10 +41,41 @@
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: var(--bg-color);
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: radial-gradient(circle at top, rgba(102,126,234,0.14), transparent 35%), var(--bg-color);
   color: var(--text-color);
   transition: background 0.3s, color 0.3s;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  outline: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+input, textarea, select {
+  border-radius: var(--border-radius);
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 @keyframes pulse {

@@ -23,9 +23,15 @@ app.use((req, res, next) => {
 
 mongoose.connect(config.mongoUri)
   .then(() => console.info(`[${config.toolId}] Connected to MongoDB`))
-  .catch(err => console.error(`[${config.toolId}] MongoDB connection error`, err));
+  .catch(err => console.warn(`[${config.toolId}] MongoDB connection error (non-blocking): ${err.message}`));
 
-const ToolUsage = mongoose.model('ToolUsage', new mongoose.Schema({ toolId: String, prompt: String, result: String, createdAt: { type: Date, default: Date.now } }));
+let ToolUsage;
+try {
+  ToolUsage = mongoose.model('ToolUsage', new mongoose.Schema({ toolId: String, prompt: String, result: String, createdAt: { type: Date, default: Date.now } }));
+} catch (e) {
+  // Model already defined
+  ToolUsage = mongoose.model('ToolUsage');
+}
 
 app.get('/health', (req, res) => {
   console.info(`[${config.toolId}] Health check`);

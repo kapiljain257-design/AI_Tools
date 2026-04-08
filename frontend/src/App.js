@@ -34,6 +34,7 @@ function App() {
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [logs, setLogs] = useState([]); // Execution logs
   const [isDeveloperMode, setIsDeveloperMode] = useState(false); // Developer mode for debugging
+  const [isInitialized, setIsInitialized] = useState(false); // Track initialization complete
 
   // Logger utility function
   const addLog = (message, level = 'info') => {
@@ -52,32 +53,157 @@ function App() {
     else console.info(`[INFO] ${message}`);
   };
 
-  useEffect(() => {
-    // Check for cached user session
-    addLog('App initialized - checking cached session', 'info');
-    const cachedUser = localStorage.getItem('user');
-    const cachedGroups = localStorage.getItem('userGroups');
-    const skipped = localStorage.getItem('loginSkipped') === 'true';
+  const SECRET_PASSPHRASE = 'tda-ai-nexus-encryption-key';
+  const STORAGE_SALT = 'tda-ai-nexus-salt-2026';
 
-    if (cachedUser) {
-      setUser(JSON.parse(cachedUser));
-      if (cachedGroups) {
-        setUserGroups(JSON.parse(cachedGroups));
-      }
-      setLoginSkipped(false);
-      setShowLoginModal(false);
-      addLog('User session restored from cache', 'success');
-    } else if (skipped) {
-      setLoginSkipped(true);
-      setShowLoginModal(false);
-      addLog('Login was skipped previously', 'info');
-    } else {
-      setShowLoginModal(true);
-      addLog('No cached session - showing login modal', 'info');
+  const arrayBufferToBase64 = (buffer) => {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    bytes.forEach((byte) => binary += String.fromCharCode(byte));
+    return window.btoa(binary);
+  };
+
+  const base64ToArrayBuffer = (base64) => {
+    const binary = window.atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) {
+      bytes[i] = binary.charCodeAt(i);
     }
+    return bytes.buffer;
+  };
 
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+  const getCryptoKey = async () => {
+    const enc = new TextEncoder();
+    const passphraseKey = await window.crypto.subtle.importKey(
+      'raw',
+      enc.encode(SECRET_PASSPHRASE),
+      'PBKDF2',
+      false,
+      ['deriveKey']
+    );
+
+    return window.crypto.subtle.deriveKey(
+      {
+        name: 'PBKDF2',
+        salt: enc.encode(STORAGE_SALT),
+        iterations: 250000,
+        hash: 'SHA-256'
+      },
+      passphraseKey,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  };
+
+  const encryptString = async (value) => {
+    try {
+      const key = await getCryptoKey();
+      const iv = window.crypto.getRandomValues(new Uint8Array(12));
+      const encrypted = await window.crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        new TextEncoder().encode(value)
+      );
+      const combined = new Uint8Array(iv.byteLength + encrypted.byteLength);
+      combined.set(iv, 0);
+      combined.set(new Uint8Array(encrypted), iv.byteLength);
+      return arrayBufferToBase64(combined.buffer);
+    } catch (error) {
+      console.error('Encryption failed:', error);
+      return null;
+    }
+  };
+
+  const decryptString = async (base64Value) => {
+    try {
+      const combined = new Uint8Array(base64ToArrayBuffer(base64Value));
+      const iv = combined.slice(0, 12);
+      const data = combined.slice(12);
+      const key = await getCryptoKey();
+      const decrypted = await window.crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        data
+      );
+      return new TextDecoder().decode(decrypted);
+    } catch (error) {
+      console.warn('Decryption failed:', error);
+      return null;
+    }
+  };
+
+  const setSecureItem = async (key, value) => {
+    const encrypted = await encryptString(JSON.stringify(value));
+    if (encrypted) {
+      localStorage.setItem(key, encrypted);
+    }
+  };
+
+  const getSecureItem = async (key) => {
+    const stored = localStorage.getItem(key);
+    if (!stored) return null;
+    const decrypted = await decryptString(stored);
+    if (!decrypted) return null;
+    try {
+      return JSON.parse(decrypted);
+    } catch {
+      return decrypted;
+    }
+  };
+
+  useEffect(() => {
+    const loadSecureState = async () => {
+      addLog('App initialized - checking cached session', 'info');
+      const cachedUser = await getSecureItem('user');
+      const cachedGroups = await getSecureItem('userGroups');
+      const skipped = await getSecureItem('loginSkipped');
+      const cachedTheme = await getSecureItem('theme');
+
+      if (cachedUser) {
+        setUser(cachedUser);
+        if (Array.isArray(cachedGroups) && cachedGroups.length > 0) {
+          setUserGroups(cachedGroups);
+        }
+        setLoginSkipped(false);
+        setShowLoginModal(false);
+        addLog('User session restored from secure storage', 'success');
+      } else if (skipped === true || skipped === 'true') {
+        setLoginSkipped(true);
+        setShowLoginModal(false);
+        addLog('Login was skipped previously', 'info');
+      } else {
+        setShowLoginModal(true);
+        addLog('No cached session - showing login modal', 'info');
+      }
+
+      if (cachedTheme === 'dark' || cachedTheme === 'light') {
+        addLog(`Restored theme from storage: ${cachedTheme}`, 'info');
+        setTheme(cachedTheme);
+      } else {
+        addLog(`No cached theme found, using default: light`, 'info');
+      }
+      
+      setIsInitialized(true);
+    };
+
+    loadSecureState();
+  }, []);
+
+  useEffect(() => {
+    if (isInitialized) {
+      document.documentElement.setAttribute('data-theme', theme);
+      setSecureItem('theme', theme).catch(err => {
+        console.warn('Failed to store theme securely', err);
+      });
+    }
+  }, [theme, isInitialized]);
+
+  useEffect(() => {
+    setSecureItem('loginSkipped', loginSkipped).catch(err => {
+      console.warn('Failed to store loginSkipped securely', err);
+    });
+  }, [loginSkipped]);
 
   // Developer mode toggle on Ctrl+Shift+D
   useEffect(() => {
@@ -125,7 +251,9 @@ function App() {
   }, [user, userGroups]);
 
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+    addLog(`Theme switched to ${nextTheme}`, 'info');
   };
 
   const handleSelect = async tool => {
@@ -172,7 +300,12 @@ function App() {
       const res = await fetch(API.endpoints.toolProcess(selected.id), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, prompt: input })
+        body: JSON.stringify({ 
+          type, 
+          prompt: input,
+          userEmail: user?.email || 'anonymous',
+          userGroups: userGroups || []
+        })
       });
 
       addLog(`Response received - Status: ${res.status} ${res.statusText}`, 'debug');
@@ -238,8 +371,8 @@ function App() {
       setUser(userData);
       setUserGroups(assignedGroups);
       setLoginSkipped(false);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('userGroups', JSON.stringify(assignedGroups));
+      setSecureItem('user', userData);
+      setSecureItem('userGroups', assignedGroups);
       localStorage.removeItem('loginSkipped');
       setShowLoginModal(false);
       setCurrentView('dashboard');
@@ -255,6 +388,7 @@ function App() {
     localStorage.removeItem('user');
     localStorage.removeItem('userGroups');
     localStorage.removeItem('loginSkipped');
+    localStorage.removeItem('theme');
     setShowLoginModal(true);
     setSelected(null);
     setStatusMessage('');
@@ -319,6 +453,7 @@ function App() {
         setStatusMessage={setStatusMessage}
         setCurrentView={setCurrentView}
         user={user}
+        userGroups={userGroups}
         isLoading={isLoading}
         theme={theme}
         toggleTheme={toggleTheme}
@@ -326,10 +461,19 @@ function App() {
         showLoginModal={showLoginModal}
         setShowLoginModal={setShowLoginModal}
         setLoginSkipped={setLoginSkipped}
+        isDeveloperMode={isDeveloperMode}
+        setIsDeveloperMode={setIsDeveloperMode}
       />
 
       {/* Main Content */}
-      {showLoginModal ? (
+      {!isInitialized ? (
+        <div style={{ padding: 24, textAlign: 'center', minHeight: 'calc(100vh - 80px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div>
+            <div style={{ fontSize: '2rem', marginBottom: '16px' }}>⏳</div>
+            <p style={{ color: 'var(--secondary-text-color)' }}>Initializing TDA AI NEXUS...</p>
+          </div>
+        </div>
+      ) : showLoginModal ? (
         <SkeletonLoader />
       ) : !user ? (
         <div style={{ padding: 24 }}>
@@ -347,7 +491,7 @@ function App() {
             feedbackMessage={feedbackMessage}
             setFeedbackMessage={setFeedbackMessage}
           />}
-          {currentView === 'about' && <About />}
+          {currentView === 'about' && <About user={user} loginSkipped={loginSkipped} />}
         </div>
       ) : (
         <div style={{ padding: selected && currentView === 'dashboard' ? 0 : 24, minHeight: 'calc(100vh - 80px)' }}>
@@ -452,7 +596,7 @@ function App() {
             setFeedbackMessage={setFeedbackMessage}
           /> : <About />}
         </div>
-      )
+      )}
 
       {showLoginModal && <LoginModal
         showLoginModal={showLoginModal}

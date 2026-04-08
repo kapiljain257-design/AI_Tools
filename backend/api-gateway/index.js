@@ -3,6 +3,7 @@ const axios = require('axios');
 const cors = require('cors');
 
 const { TOOLS, SUPPORT, API, USER_GROUPS } = require('./constants');
+const { connectDB, initModels, logLogin, logToolStatus, logToolUsage, getAnalytics } = require('../db-service');
 
 const app = express();
 app.use(cors());
@@ -62,14 +63,62 @@ app.post('/api/tools/:id/process', async (req, res) => {
   }
 
   console.info(`Proxying process request for ${tool.id}`);
+  const startTime = Date.now();
   try {
     const response = await axios.post(`http://localhost:${tool.port}/process`, req.body, { timeout: API.timeout.process });
+    const executionTime = Date.now() - startTime;
+    
+    // Log tool usage
+    const userEmail = req.body.userEmail || 'anonymous';
+    const userGroups = req.body.userGroups || [];
+    const prompt = req.body.prompt || req.body.input || '';
+    const result = response.data.result || '';
+    
+    logToolUsage(tool.id, userEmail, userGroups, {
+      inputLength: prompt.length,
+      outputLength: result.length,
+      executionTime,
+      status: 'success',
+      type: req.body.type || 'text',
+      result
+    });
+    
     return res.json(response.data);
   } catch (err) {
+    const executionTime = Date.now() - startTime;
+    const userEmail = req.body.userEmail || 'anonymous';
+    const userGroups = req.body.userGroups || [];
+    
+    // Log failed execution
+    logToolUsage(tool.id, userEmail, userGroups, {
+      inputLength: (req.body.prompt || req.body.input || '').length,
+      outputLength: 0,
+      executionTime,
+      status: 'error',
+      errorMessage: err.message,
+      type: req.body.type || 'text'
+    });
+    
     console.error(`Proxy error for ${tool.id}`, err.message);
     return res.status(500).json({ error: SUPPORT.proxyError });
   }
 });
 
+app.get('/api/analytics', async (req, res) => {
+  console.info('Fetching analytics');
+  const analytics = await getAnalytics();
+  res.json(analytics || { message: 'Analytics unavailable - database not connected' });
+});
+
+// Initialize database and start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`API Gateway running on ${PORT}`));
+
+(async () => {
+  await connectDB();
+  initModels();
+  
+  app.listen(PORT, () => {
+    console.log(`✅ API Gateway running on ${PORT}`);
+    console.log(`📊 Analytics available at http://localhost:${PORT}/api/analytics`);
+  });
+})();

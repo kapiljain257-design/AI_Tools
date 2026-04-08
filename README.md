@@ -209,14 +209,20 @@ Each microservice can implement data persistence:
 
 ## Documentation
 
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Full deployment guide and tech stack details
-- [PERMISSION_SYSTEM.md](./PERMISSION_SYSTEM.md) - User group and permission system
-- [TESTING_GUIDE.md](./TESTING_GUIDE.md) - Test credentials and verification steps
-- [docs/diagrams/](./docs/diagrams/) - System architecture and component diagrams
+For comprehensive documentation, visit the **[docs/](./docs/)** folder:
 
-See [docs/diagrams/system_architecture.md](./docs/diagrams/system_architecture.md), [docs/diagrams/class_diagram.md](./docs/diagrams/class_diagram.md), and [docs/diagrams/sequence_diagram.md](./docs/diagrams/sequence_diagram.md) for:
-- system architecture diagram
-- class/component diagram
-- sequence diagram
+### 📚 Quick Links
+- **[docs/INDEX.md](./docs/INDEX.md)** - Complete documentation index and navigation
+- **[docs/INSTALLATION_GUIDE.md](./docs/INSTALLATION_GUIDE.md)** - Detailed setup instructions
+- **[docs/DATABASE.md](./docs/DATABASE.md)** - MongoDB schemas, queries, and database setup
+- **[docs/WEBSITE_TESTING_GUIDE.md](./docs/WEBSITE_TESTING_GUIDE.md)** - Feature testing checklist and examples
+- **[docs/QUICK_REFERENCE.md](./docs/QUICK_REFERENCE.md)** - Common commands and debugging
+- **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** - Production deployment guide
+- **[docs/IMPLEMENTATION_SUMMARY.md](./docs/IMPLEMENTATION_SUMMARY.md)** - Feature overview and status
+- **[docs/PERMISSION_SYSTEM.md](./docs/PERMISSION_SYSTEM.md)** - User groups and access control
+- **[docs/TESTING_GUIDE.md](./docs/TESTING_GUIDE.md)** - Automated testing procedures
+- **[docs/diagrams/](./docs/diagrams/)** - System architecture diagrams
+
+**New to the project?** Start with [docs/INDEX.md](./docs/INDEX.md) for guided navigation!
 
 

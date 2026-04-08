@@ -28,7 +28,6 @@ function LoginModal({ showLoginModal, setShowLoginModal, setLoginSkipped, handle
         <button onClick={() => {
           setShowLoginModal(false);
           setLoginSkipped(true);
-          localStorage.setItem('loginSkipped', 'true');
         }} style={{
           position: 'absolute',
           top: '10px',
