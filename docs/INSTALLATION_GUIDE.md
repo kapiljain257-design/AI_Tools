@@ -195,7 +195,7 @@ pm2 start ecosystem.config.js
 ## Access the Application
 
 Once all services are running:
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:3001
 - API Gateway: http://localhost:5000
 - Individual Services: http://localhost:5001-5005
 
@@ -204,7 +204,7 @@ Once all services are running:
 ### Common Issues
 
 1. **Port Conflicts**
-   - Ensure ports 3000, 5000-5005 are available
+   - Ensure ports 3001, 5000-5005 are available
    - Change ports in service configuration if needed
 
 2. **MongoDB Connection Issues**

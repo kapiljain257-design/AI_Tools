@@ -55,7 +55,7 @@
 | **Perfectto** | 5004 | `PORT=5004` |
 | **Repro Tool** | 5005 | `PORT=5005` |
 | **MongoDB** | 27017 | `MONGODB_URI=mongodb://localhost:27017` |
-| **Frontend (React)** | 3000 | Development server |
+| **Frontend (React)** | 3001 | Development server |
 
 ---
 
@@ -142,7 +142,7 @@ NODE_ENV=development
 **Frontend** (`frontend/.env`):
 ```env
 REACT_APP_API_URL=http://localhost:5000
-PORT=3000
+PORT=3001
 ```
 
 ### Running Locally
@@ -265,7 +265,7 @@ curl -X POST http://localhost:5000/api/tools/nova/process \
 ```
 
 Access frontend:
-- **Development**: http://localhost:3000
+- **Development**: http://localhost:3001
 - Use test credentials from [TESTING_GUIDE.md](./TESTING_GUIDE.md)
 
 ---

@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart TD
-    A["🖥️ React Frontend<br/>Port 3000"] -->|REST /api/tools| B["🌐 API Gateway<br/>Express | Port 5000"]
+    A["🖥️ React Frontend<br/>Port 3001"] -->|REST /api/tools| B["🌐 API Gateway<br/>Express | Port 5000"]
     
     B -->|/api/tools/filtered| C["📊 Tool Registry"]
     B -->|/api/tools/:id/status| D["⚡ Tool Services"]

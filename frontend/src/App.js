@@ -37,6 +37,7 @@ function App() {
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [logs, setLogs] = useState([]); // Execution logs
   const [isDeveloperMode, setIsDeveloperMode] = useState(false); // Developer mode for debugging
+  const [pendingToolId, setPendingToolId] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false); // Track initialization complete
 
   // Logger utility function
@@ -189,7 +190,33 @@ function App() {
       } else {
         addLog(`No cached theme found, using default: light`, 'info');
       }
-      
+
+      const pageHash = window.location.hash || '#dashboard';
+      let routeView = 'dashboard';
+      let routeSelected = null;
+
+      if (pageHash.startsWith('#tool-')) {
+        routeSelected = pageHash.replace('#tool-', '');
+        routeView = 'dashboard';
+        setPendingToolId(routeSelected);
+        setCurrentView('dashboard');
+        addLog(`Restoring route to tool: ${routeSelected}`, 'info');
+      } else if (pageHash === '#about') {
+        routeView = 'about';
+        setCurrentView('about');
+        addLog('Restoring route to About page', 'info');
+      } else if (pageHash === '#feedback') {
+        routeView = 'feedback';
+        setCurrentView('feedback');
+        addLog('Restoring route to Feedback page', 'info');
+      } else {
+        routeView = 'dashboard';
+        setCurrentView('dashboard');
+        addLog('Restoring route to Dashboard page', 'info');
+      }
+
+      window.history.replaceState({ view: routeView, selected: routeSelected }, '', pageHash);
+
       setIsInitialized(true);
     };
 
@@ -231,28 +258,38 @@ function App() {
 
   const pushHistoryState = (view, selectedToolId = null) => {
     const url = view === 'dashboard'
-      ? selectedToolId ? `#tool-${selectedToolId}` : '/'
+      ? selectedToolId ? `#tool-${selectedToolId}` : '#dashboard'
       : view === 'feedback' ? '#feedback' : '#about';
     window.history.pushState({ view, selected: selectedToolId }, '', url);
   };
 
   useEffect(() => {
     const handlePopState = (event) => {
+      const hash = window.location.hash;
       if (event.state && event.state.view) {
         setCurrentView(event.state.view);
         if (event.state.selected) {
+          setPendingToolId(event.state.selected);
           setSelected(prev => {
             if (prev && prev.id === event.state.selected) return prev;
             return null;
           });
         } else {
+          setPendingToolId(null);
           setSelected(null);
         }
+      } else if (hash.startsWith('#tool-')) {
+        setCurrentView('dashboard');
+        setPendingToolId(hash.replace('#tool-', ''));
+      } else if (hash === '#about') {
+        setCurrentView('about');
+        setSelected(null);
+      } else if (hash === '#feedback') {
+        setCurrentView('feedback');
+        setSelected(null);
       } else {
-        const hash = window.location.hash;
-        if (hash === '#about') setCurrentView('about');
-        else if (hash === '#feedback') setCurrentView('feedback');
-        else setCurrentView('dashboard');
+        setCurrentView('dashboard');
+        setSelected(null);
       }
     };
     window.addEventListener('popstate', handlePopState);
@@ -278,6 +315,19 @@ function App() {
         });
     }
   }, [user, userGroups]);
+
+  useEffect(() => {
+    if (isInitialized && tools.length > 0 && pendingToolId) {
+      const tool = tools.find(t => t.id === pendingToolId);
+      if (tool) {
+        addLog(`Auto-selecting tool from route: ${pendingToolId}`, 'info');
+        handleSelect(tool);
+      } else {
+        addLog(`Pending tool from route not found: ${pendingToolId}`, 'warning');
+      }
+      setPendingToolId(null);
+    }
+  }, [isInitialized, tools, pendingToolId]);
 
   const toggleTheme = () => {
     const nextTheme = theme === 'light' ? 'dark' : 'light';

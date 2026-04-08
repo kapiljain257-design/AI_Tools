@@ -348,6 +348,14 @@ curl http://localhost:5000/api/analytics
 6. Confirm persistence after refresh
 ```
 
+### Step 8: Verify Page Persistence on Refresh
+```
+1. Open a different view: About Us, Feedback, or a specific tool
+2. Refresh the browser
+3. Confirm the same page remains visible after reload
+4. If a tool page is open, the same tool should stay selected
+```
+
 ### Step 8: Toggle Developer Mode (Admin Only)
 ```
 1. Look for ⚙️ icon in header

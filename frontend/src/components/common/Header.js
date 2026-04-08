@@ -37,7 +37,7 @@ function Header({
       backdropFilter: 'blur(14px)'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
-        <h1 onClick={currentView !== 'dashboard' ? () => { setSelected(null); setOutput(''); setStatusMessage(''); setCurrentView('dashboard'); window.history.pushState({view: 'dashboard'}, '', ''); } : undefined} style={{
+        <h1 onClick={currentView !== 'dashboard' ? () => { setSelected(null); setOutput(''); setStatusMessage(''); setCurrentView('dashboard'); window.history.pushState({view: 'dashboard'}, '', '#dashboard'); } : undefined} style={{
           margin: 0,
           color: 'var(--text-color)',
           background: 'none',
@@ -75,7 +75,7 @@ function Header({
         justifyContent: 'center'
       }}>
         {selected && (
-          <button onClick={() => { setSelected(null); setOutput(''); setStatusMessage(''); setCurrentView('dashboard'); window.history.pushState({view: 'dashboard'}, '', ''); }} style={{
+          <button onClick={() => { setSelected(null); setOutput(''); setStatusMessage(''); setCurrentView('dashboard'); window.history.pushState({view: 'dashboard'}, '', '#dashboard'); }} style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',

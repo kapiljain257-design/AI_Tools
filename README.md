@@ -87,10 +87,10 @@ cd backend/repro-tool && npm start          # Port 5005
 **Frontend:**
 ```bash
 # Terminal 7: React Frontend
-cd frontend && npm start                    # Port 3000
+cd frontend && npm start                    # Port 3001
 ```
 
-The application will be available at `http://localhost:3000`
+The application will be available at `http://localhost:3001`
 
 ---
 
