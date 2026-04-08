@@ -1,0 +1,154 @@
+* { box-sizing: border-box; }
+
+:root {
+  --bg-color: #f5f8fb;
+  --text-color: #333;
+  --header-bg: #fff;
+  --header-border: #ddd;
+  --card-bg: #ffffff;
+  --card-border: #ddd;
+  --button-bg: #007bff;
+  --button-text: white;
+  --button-hover: #0056b3;
+  --input-bg: #fff;
+  --input-border: #ccc;
+  --modal-bg: rgba(0,0,0,0.5);
+  --modal-card-bg: white;
+  --link-color: #007bff;
+  --shadow: 0 2px 4px rgba(0,0,0,0.1);
+  --border-radius: 8px;
+}
+
+[data-theme="dark"] {
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+  --header-bg: #1e1e1e;
+  --header-border: #333;
+  --card-bg: #2a2a2a;
+  --card-border: #444;
+  --button-bg: #1e90ff;
+  --button-text: white;
+  --button-hover: #0066cc;
+  --input-bg: #333;
+  --input-border: #555;
+  --modal-bg: rgba(0,0,0,0.7);
+  --modal-card-bg: #2a2a2a;
+  --link-color: #1e90ff;
+  --shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  transition: background 0.3s, color 0.3s;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  /* Header responsive */
+  header {
+    padding: 10px 15px !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  header h1 {
+    font-size: 1.5rem !important;
+    margin: 0 !important;
+  }
+
+  /* Modal responsive */
+  [style*="position: fixed"] > div > div {
+    width: 90% !important;
+    max-width: 300px !important;
+    margin: 20px !important;
+  }
+
+  /* Grid responsive */
+  [style*="display: grid"] {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+
+  /* Card responsive */
+  [style*="background: var(--card-bg)"] {
+    padding: 15px !important;
+  }
+
+  /* Button responsive */
+  button {
+    padding: 10px 15px !important;
+    font-size: 14px !important;
+  }
+
+  /* Input responsive */
+  input, textarea, select {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens */
+  header h1 {
+    font-size: 1.3rem !important;
+  }
+
+  [style*="padding: 24"] {
+    padding: 15px !important;
+  }
+
+  /* Team info responsive */
+  [style*="max-width: 1200px"] {
+    padding: 15px !important;
+  }
+
+  [style*="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Ensure crisp text and borders */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Touch devices */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets for mobile */
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Remove hover effects on touch */
+  button:hover, [role="button"]:hover {
+    transform: none !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  button, input, textarea, select {
+    display: none !important;
+  }
+}
