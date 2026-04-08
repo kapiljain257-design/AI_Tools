@@ -47,7 +47,7 @@ const TeamInfo = ({ onLoginClick }) => {
             👨‍💻
           </div>
           <h3 style={{ color: 'var(--text-color)', marginBottom: '10px' }}>John Doe</h3>
-          <p style={{ color: '#666', marginBottom: '15px' }}>Lead Developer</p>
+          <p style={{ color: 'var(--secondary-text-color)', marginBottom: '15px' }}>Lead Developer</p>
           <p style={{ color: 'var(--text-color)', fontSize: '0.9rem', lineHeight: '1.6' }}>
             Passionate about creating innovative AI solutions and leading development teams to build cutting-edge microservice architectures.
           </p>
@@ -77,7 +77,7 @@ const TeamInfo = ({ onLoginClick }) => {
             👩‍🎨
           </div>
           <h3 style={{ color: 'var(--text-color)', marginBottom: '10px' }}>Jane Smith</h3>
-          <p style={{ color: '#666', marginBottom: '15px' }}>UI/UX Designer</p>
+          <p style={{ color: 'var(--secondary-text-color)', marginBottom: '15px' }}>UI/UX Designer</p>
           <p style={{ color: 'var(--text-color)', fontSize: '0.9rem', lineHeight: '1.6' }}>
             Expert in creating intuitive user experiences and designing beautiful interfaces that users love to interact with.
           </p>
@@ -107,7 +107,7 @@ const TeamInfo = ({ onLoginClick }) => {
             🔬
           </div>
           <h3 style={{ color: 'var(--text-color)', marginBottom: '10px' }}>Dr. Alex Johnson</h3>
-          <p style={{ color: '#666', marginBottom: '15px' }}>AI Research Scientist</p>
+          <p style={{ color: 'var(--secondary-text-color)', marginBottom: '15px' }}>AI Research Scientist</p>
           <p style={{ color: 'var(--text-color)', fontSize: '0.9rem', lineHeight: '1.6' }}>
             Leading research in machine learning and AI, developing advanced algorithms for next-generation intelligent systems.
           </p>
@@ -137,7 +137,7 @@ const TeamInfo = ({ onLoginClick }) => {
             🚀
           </div>
           <h3 style={{ color: 'var(--text-color)', marginBottom: '10px' }}>Mike Chen</h3>
-          <p style={{ color: '#666', marginBottom: '15px' }}>DevOps Engineer</p>
+          <p style={{ color: 'var(--secondary-text-color)', marginBottom: '15px' }}>DevOps Engineer</p>
           <p style={{ color: 'var(--text-color)', fontSize: '0.9rem', lineHeight: '1.6' }}>
             Ensuring scalable, reliable, and secure deployment of AI applications with expertise in cloud infrastructure and automation.
           </p>

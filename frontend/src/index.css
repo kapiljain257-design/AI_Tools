@@ -3,6 +3,7 @@
 :root {
   --bg-color: #f5f8fb;
   --text-color: #333;
+  --secondary-text-color: #666;
   --header-bg: #fff;
   --header-border: #ddd;
   --card-bg: #ffffff;
@@ -22,6 +23,7 @@
 [data-theme="dark"] {
   --bg-color: #121212;
   --text-color: #e0e0e0;
+  --secondary-text-color: #aaa;
   --header-bg: #1e1e1e;
   --header-border: #333;
   --card-bg: #2a2a2a;

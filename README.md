@@ -1,107 +1,218 @@
-# Microservice Tool Platform (React + Express + MongoDB)
+# TDA AI NEXUS - Microservice Tool Platform (React + Express + MongoDB)
 
-This repository provides a starter full-stack microservices architecture with a React dashboard, Node.js/Express API gateway, and multiple tool microservices.
+A full-stack microservices architecture providing a React dashboard for AI-powered tools with Node.js/Express API gateway and multiple specialized microservices.
 
-## Project structure
+## Project Structure
 
-- `backend/api-gateway` - main REST endpoint that lists tools, checks tool health, and proxies requests.
-- `backend/tool-service-1` to `backend/tool-service-5` - independent tool microservices with own ports and REST routes.
-- `frontend` - React SPA with dashboard and dynamic tool UI.
+### Backend
+- `backend/api-gateway/` - Main REST API endpoint for tool listing, health checks, and request proxying
+- `backend/nova/` - Advanced text processing and translation microservice
+- `backend/image-generator/` - AI-powered image generation microservice
+- `backend/indus-report/` - Comprehensive reporting and data analysis microservice
+- `backend/perfectto/` - Quality assurance and content optimization microservice
+- `backend/repro-tool/` - Reproduction and issue tracking microservice
 
-> Note: MongoDB integration is scaffolded by placeholder here with note. Each microservice can add MongoDB operations in their own `index.js`.
+### Frontend
+- `frontend/` - React SPA (18.3.1) with modular component architecture
+  - `src/components/common/` - Reusable components (Header, LoginModal, TeamInfo)
+  - `src/components/pages/` - Page-level components (Dashboard, ToolInterface, Feedback, About)
+  - `src/components/tools/` - **Tool-specific interface components** (organized by tool ID)
+    - `nova/NovaInterface.js` - Text processing UI with mode selector
+    - `image-generator/ImageGeneratorInterface.js` - Image generation with URL detection
+    - `indus-report/IndustReportInterface.js` - Report type selector and data input
+    - `perfectto/PerfectoInterface.js` - Content optimization interface
+    - `repro-tool/ReproToolInterface.js` - Issue tracking and report submission
+
+> Each microservice can implement MongoDB operations via Mongoose in their own `index.js`
 
 ---
 
-## Prerequisites
+## Quick Start
 
+### Prerequisites
 - Node.js 20+ (or 18+)
 - npm
 - Git
 - (Optional) Docker for local MongoDB
 
----
+### Setup & Installation
 
-## Codespaces setup
+1. Clone repository:
+   ```bash
+   git clone https://github.com/kapiljain257-design/AI_Tools.git
+   cd AI_Tools
+   ```
 
-1. Open this repository in GitHub Codespaces.
-2. In a terminal, go to service folders and install dependencies:
-   - `cd backend/api-gateway && npm install`
-   - `cd ../tool-service-1 && npm install`
-   - `cd ../tool-service-2 && npm install`
-   - `cd ../tool-service-3 && npm install`
-   - `cd ../tool-service-4 && npm install`
-   - `cd ../tool-service-5 && npm install`
-   - `cd /workspaces/Microservce_tool/frontend && npm install`
-3. (Optional) Start MongoDB in Codespaces:
-   - `docker run -d -p 27017:27017 --name mongo mongo:latest`
+2. Install dependencies for all services:
+   ```bash
+   cd backend/api-gateway && npm install
+   cd ../nova && npm install
+   cd ../image-generator && npm install
+   cd ../indus-report && npm install
+   cd ../perfectto && npm install
+   cd ../repro-tool && npm install
+   cd ../../frontend && npm install
+   ```
 
----
+3. (Optional) Start MongoDB in Docker:
+   ```bash
+   docker run -d -p 27017:27017 --name mongo mongo:latest
+   ```
 
-## Run microservices
+### Running the Application
 
-Open several terminals, one for each service.
+Open multiple terminal windows or tabs, one for each service:
 
-- API gateway: `cd backend/api-gateway && npm start` (port 5000)
-- Translator: `cd backend/tool-service-1 && npm start` (port 5001)
-- Summarizer: `cd backend/tool-service-2 && npm start` (port 5002)
-- Sentiment: `cd backend/tool-service-3 && npm start` (port 5003)
-- Calculator: `cd backend/tool-service-4 && npm start` (port 5004)
-- Image generator: `cd backend/tool-service-5 && npm start` (port 5005)
+**Backend Services:**
+```bash
+# Terminal 1: API Gateway
+cd backend/api-gateway && npm start         # Port 5000
 
-Run frontend:
+# Terminal 2: Nova Tool
+cd backend/nova && npm start                # Port 5001
 
-- `cd frontend && npm start` (port 3000)
+# Terminal 3: Image Generator Tool
+cd backend/image-generator && npm start     # Port 5002
 
----
+# Terminal 4: Indus Report Tool
+cd backend/indus-report && npm start        # Port 5003
 
-## Behavior
+# Terminal 5: Perfectto Tool
+cd backend/perfectto && npm start           # Port 5004
 
-- Dashboard loads tool list from API gateway `/api/tools`.
-- Clicking a tool calls `/api/tools/:id/status`.
-- If inactive, user sees message to contact support.
-- If active, user gets tool input UI.
-- Submit sends request to `/api/tools/:id/process`.
-- API gateway proxies to specific tool microservice.
-- Response shown in UI.
+# Terminal 6: Repro Tool
+cd backend/repro-tool && npm start          # Port 5005
+```
 
----
+**Frontend:**
+```bash
+# Terminal 7: React Frontend
+cd frontend && npm start                    # Port 3000
+```
 
-## Extending tools
-
-To add a new tool microservice:
-
-1. Copy an existing tool folder (`backend/tool-service-5`) to `backend/tool-service-6`.
-2. Update `index.js` logic and port, e.g., `PORT=5006`, `toolId='new-tool'`.
-3. Add entry in `backend/api-gateway/index.js` `tools` list with new id/port.
-4. Restart API gateway.
-5. Add optional MongoDB data persistence in that new service:
-   - install `mongoose` and connect to `mongodb://localhost:27017/<dbname>`.
-
-To add more tools in frontend list, backend API gateway source is canonical; front-end reads all from `/api/tools`.
+The application will be available at `http://localhost:3000`
 
 ---
 
-## MongoDB notes
+## Available Tools
 
-- Each tool service may add `mongodb`/`mongoose` and maintain own collections.
-- Example:
-  - `npm install mongoose`
-  - in `index.js`, connect with `mongoose.connect('mongodb://localhost:27017/tools')`
-  - define tool-specific schemas.
-
-## Support
-
-If a tool stays inactive, reach out to support@example.com and verify both microservice and API gateway processes are running.
+| Tool | Purpose | Port |
+|------|---------|------|
+| **Nova** | Advanced text processing, summarization, and translation | 5001 |
+| **Image Generator** | AI-powered image generation from text descriptions | 5002 |
+| **Indus Report** | Comprehensive reporting and data analysis system | 5003 |
+| **Perfectto** | Quality assurance and content optimization | 5004 |
+| **Repro Tool** | Reproduction/issue tracking and framework automation | 5005 |
 
 ---
 
-## Deployment, architecture and diagrams
+## Architecture & Behavior
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for:
-- frameworks + tools used
-- full clone/install/run steps for new machine
-- Docker/MongoDB setup
-- production hints and adding more tool microservices
+### Request Flow
+1. **Dashboard**: React frontend loads available tools from API Gateway `/api/tools/filtered` (filtered by user permissions)
+2. **Tool Selection**: Clicking a tool checks status via `/api/tools/:id/status`
+3. **Status Check**: 
+   - If active: User receives tool-specific UI
+   - If inactive: User sees maintenance message with support contact
+4. **Processing**: Submit sends request to `/api/tools/:id/process`
+5. **Proxy**: API Gateway proxies request to appropriate microservice
+6. **Response**: Result displayed in tool-specific interface component
+
+### Component Architecture
+- **Generic Flow**: App.js → ToolInterface.js → Conditional routing
+- **Tool-Specific Components**: Located in `/components/tools/{toolId}/`
+  - Each tool has its own interface component with customized UI
+  - Consistent props interface for state management
+  - Tool-specific labels, controls, and input types
+
+---
+
+## Permission-Based Access Control
+
+The platform implements user groups to control tool access. See [PERMISSION_SYSTEM.md](./PERMISSION_SYSTEM.md) for details.
+
+### User Groups
+- `qipl.nova.users` - Nova tool access
+- `qipl.indus.users` - Indus Report access
+- `qipl.perfectto.users` - Perfectto access
+- `qipl.repro.users` - Repro Tool access
+- `qipl.tda.developers` - Super admin (all tools)
+
+### How It Works
+1. Users log in with email, password, and API key
+2. Frontend automatically assigns groups based on email keywords
+3. Only tools matching user's groups appear in dashboard
+4. Backend validates permissions on each request
+
+---
+
+## Extending the Platform
+
+### Adding a New Tool Microservice
+1. Create new folder: `backend/new-tool/`
+2. Copy structure from existing tool (e.g., `backend/nova/`)
+3. Update `index.js`:
+   - Set unique port (e.g., 5006)
+   - Update `toolId` to match folder name
+   - Implement tool-specific logic
+4. Add tool definition to `backend/api-gateway/constants.js`
+5. Create tool-specific React component in `frontend/src/components/tools/{toolId}/`
+6. Restart API Gateway
+
+### Adding a New User Group
+1. Update `backend/api-gateway/constants.js` with new group
+2. Update `frontend/src/constants.js` to match
+3. Add tools to new group's `requiredGroups` array
+4. Restart services
+
+---
+
+## MongoDB Integration
+
+Each microservice can implement data persistence:
+
+1. Install mongoose:
+   ```bash
+   npm install mongoose
+   ```
+
+2. In `index.js`, add connection:
+   ```javascript
+   const mongoose = require('mongoose');
+   mongoose.connect('mongodb://localhost:27017/nova-db');
+   ```
+
+3. Define tool-specific schemas and models
+
+---
+
+## Support & Troubleshooting
+
+**Issue**: Tool shows as inactive
+- Verify the tool microservice is running on correct port
+- Check API Gateway is accessible on port 5000
+- Verify network connectivity between services
+
+**Issue**: Tools not visible in dashboard
+- Confirm user has appropriate group permissions
+- Check backend/api-gateway/constants.js tool definitions
+- Verify browser localStorage doesn't have stale data (clear and reload)
+
+**Issue**: API Gateway connection errors
+- Ensure API Gateway started first (dependencies on it)
+- Check no other process using port 5000
+- Test with: `curl http://localhost:5000/api/tools`
+
+**Support Contact**: support@example.com
+
+---
+
+## Documentation
+
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Full deployment guide and tech stack details
+- [PERMISSION_SYSTEM.md](./PERMISSION_SYSTEM.md) - User group and permission system
+- [TESTING_GUIDE.md](./TESTING_GUIDE.md) - Test credentials and verification steps
+- [docs/diagrams/](./docs/diagrams/) - System architecture and component diagrams
 
 See [docs/diagrams/system_architecture.md](./docs/diagrams/system_architecture.md), [docs/diagrams/class_diagram.md](./docs/diagrams/class_diagram.md), and [docs/diagrams/sequence_diagram.md](./docs/diagrams/sequence_diagram.md) for:
 - system architecture diagram

@@ -1,102 +1,418 @@
 # Deployment and Tech Stack Reference
 
-## 🧩 What is included
-- Frontend: React (Create React App)
-- Backend gateway: Node.js + Express
-- Tool microservices: Node.js + Express (each independent)
-- Data store: MongoDB (each microservice can connect via Mongoose)
-- API proxy/routing: API gateway (`/api/tools`, `/api/tools/:id/status`, `/api/tools/:id/process`)
+## 📋 What is Included
 
-## 🛠️ Frameworks and tools in use
-- Node.js (Express) for all backend services
-- React in frontend (CRA scaffold)
-- MongoDB for persistence
-- mongoose for MongoDB ORM (declared in microservice packages)
-- cors, body-parser for API body parsing and cross-origin support
+### Frontend
+- **React 18.3.1** with functional components and hooks
+- **Modular component architecture** with tool-specific interfaces
+- **Theme support** (light/dark mode)
+- **Permission-based UI** - displays only accessible tools per user group
+- **Local storage** - persists user session and preferences
 
-## 🔢 Ports (default)
-- API gateway: `5000`
-- tool-service-1 (translator): `5001`
-- tool-service-2 (summarizer): `5002`
-- tool-service-3 (sentiment): `5003`
-- tool-service-4 (calculator): `5004`
-- tool-service-5 (image-generator): `5005`
-- frontend: `3000`
+### Backend Architecture
+- **API Gateway** - Node.js + Express (port 5000)
+  - Central request proxy and router
+  - Tool listing and filtering (by user permissions)
+  - Health status checking
+  - CORS and body-parser middleware
 
-## 📦 Deploy this on another machine
+- **Microservices** - 5 independent Node.js + Express services
+  - Nova (port 5001) - Text processing
+  - Image Generator (port 5002) - Image generation
+  - Indus Report (port 5003) - Report generation
+  - Perfectto (port 5004) - QA/Optimization
+  - Repro Tool (port 5005) - Issue tracking
 
-### 1) Clone repository
+### Data & Persistence
+- **MongoDB** - Optional document database for each microservice
+- **Mongoose** - ORM for MongoDB (can be added per service)
+- **Environment variables** - MONGODB_URI, PORT configuration
+
+---
+
+## 🛠️ Core Technologies
+
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| Frontend | React 18.3.1 | UI rendering and state management |
+| Backend Gateway | Express.js | Request routing and filtering |
+| Microservices | Express.js | Tool-specific processing |
+| Database | MongoDB | Session/data persistence |
+| ORM | Mongoose | MongoDB abstraction |
+| Middleware | cors, body-parser | API security and parsing |
+| Package Manager | npm | Dependency management |
+
+---
+
+## 🔢 Port Configuration
+
+| Service | Port | Environment |
+|---------|------|-------------|
+| **API Gateway** | 5000 | `PORT=5000` |
+| **Nova** | 5001 | `PORT=5001` |
+| **Image Generator** | 5002 | `PORT=5002` |
+| **Indus Report** | 5003 | `PORT=5003` |
+| **Perfectto** | 5004 | `PORT=5004` |
+| **Repro Tool** | 5005 | `PORT=5005` |
+| **MongoDB** | 27017 | `MONGODB_URI=mongodb://localhost:27017` |
+| **Frontend (React)** | 3000 | Development server |
+
+---
+
+## 📦 Deployment Guide
+
+### Prerequisites
+- **Node.js** 18+ (recommended 20+)
+- **npm** 8+
+- **Git**
+- **MongoDB** (local installation or Docker)
+
+### OS-Specific Setup
+
+#### Ubuntu/Debian Linux
 ```bash
-git clone https://github.com/kapilsankhlecha/Microservce_tool.git
-cd Microservce_tool
-```
+# Install Node.js 20
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
-### 2) Install runtime prerequisites
-- Node.js 18+ (recommended 20+)
-- npm
-- MongoDB (local or hosted)
-
-#### Local MongoDB (Linux example)
-```bash
+# Install MongoDB (optional - local installation)
 sudo apt update
 sudo apt install -y mongodb
 sudo systemctl enable mongod --now
 ```
 
-#### Docker MongoDB (cross-platform)
+#### macOS
 ```bash
-docker run -d --name microservce-mongo -p 27017:27017 mongo:latest
+# Install Node.js via Homebrew
+brew install node@20
+brew link node@20
+
+# Install MongoDB via Homebrew (optional)
+brew install mongodb-community
+brew services start mongodb-community
 ```
 
-### 3) Install dependencies
+#### Docker MongoDB (Cross-platform)
 ```bash
-cd backend/api-gateway && npm install
-cd ../tool-service-1 && npm install
-cd ../tool-service-2 && npm install
-cd ../tool-service-3 && npm install
-cd ../tool-service-4 && npm install
-cd ../tool-service-5 && npm install
-cd ../../frontend && npm install
+docker run -d --name tda-mongo -p 27017:27017 mongo:latest
 ```
 
-### 4) Configure environment
-- Optional env var for MongoDB: `MONGODB_URI`, e.g.: 
-  `mongodb://localhost:27017/microservice_tools`
-- API gateway port override: `PORT` (default 5000)
-- Tool service ports: configured in each service `index.js` or via `PORT`
+### Clone & Install
 
-### 5) Start backend microservices
-In multiple terminals or use a process manager (pm2/tmux):
 ```bash
+# Clone repository
+git clone https://github.com/kapiljain257-design/AI_Tools.git
+cd AI_Tools
+
+# Install backend API Gateway
+cd backend/api-gateway
+npm install
+cd ..
+
+# Install all tool microservices
+for tool in nova image-generator indus-report perfectto repro-tool; do
+  cd "$tool"
+  npm install
+  cd ..
+done
+
+# Install frontend
+cd ../../frontend
+npm install
+```
+
+### Configuration
+
+#### Environment Variables
+Create `.env` files in each service (optional):
+
+**Backend services** (e.g., `backend/nova/.env`):
+```env
+PORT=5001
+MONGODB_URI=mongodb://localhost:27017/nova
+NODE_ENV=development
+```
+
+**API Gateway** (`backend/api-gateway/.env`):
+```env
+PORT=5000
+NODE_ENV=development
+```
+
+**Frontend** (`frontend/.env`):
+```env
+REACT_APP_API_URL=http://localhost:5000
+PORT=3000
+```
+
+### Running Locally
+
+**Option 1: Multiple Terminal Windows**
+```bash
+# Terminal 1: API Gateway
 cd backend/api-gateway && npm start
-cd backend/tool-service-1 && npm start
-cd backend/tool-service-2 && npm start
-cd backend/tool-service-3 && npm start
-cd backend/tool-service-4 && npm start
-cd backend/tool-service-5 && npm start
-```
 
-### 6) Start frontend
-```bash
+# Terminal 2-6: Tool Services (one per terminal)
+cd backend/nova && npm start
+cd backend/image-generator && npm start
+cd backend/indus-report && npm start
+cd backend/perfectto && npm start
+cd backend/repro-tool && npm start
+
+# Terminal 7: Frontend
 cd frontend && npm start
 ```
 
-### 7) Verify
-- `curl http://localhost:5000/api/tools`
-- `curl http://localhost:5000/api/tools/translator/status`
-- `curl -X POST http://localhost:5000/api/tools/translator/process -H "Content-Type: application/json" -d '{"prompt":"hello"}'`
+**Option 2: Using tmux (Linux/macOS)**
+```bash
+tmux new-session -d -s tda
+tmux new-window -t tda -n api-gateway -c /workspaces/AI_Tools/backend/api-gateway
+tmux send-keys -t tda:api-gateway "npm start" Enter
 
-### 8) Optional production deployment (recommended)
-- Build frontend: `cd frontend && npm run build`
-- Serve static files via Nginx for production
-- Use process manager for Node services: `pm2 start index.js --name api-gateway`, etc.
+tmux new-window -t tda -n nova -c /workspaces/AI_Tools/backend/nova
+tmux send-keys -t tda:nova "npm start" Enter
 
-## ➕ Adding new tools later
-1. Copy `backend/tool-service-5` to a new folder `backend/tool-service-6` (or named for its role).
-2. Update `index.js` in new microservice: toolId, port, processing logic.
-3. Add to API gateway `tools` list (`backend/api-gateway/index.js`).
-4. Restart API gateway + new microservice.
-5. UI will list it from `/api/tools` automatically.
+# Continue for other services...
+
+tmux new-window -t tda -n frontend -c /workspaces/AI_Tools/frontend
+tmux send-keys -t tda:frontend "npm start" Enter
+
+# Attach to session
+tmux attach -t tda
+```
+
+**Option 3: Using pm2 (Production-like)**
+```bash
+npm install -g pm2
+
+# Create ecosystem.config.js in project root
+cat > ecosystem.config.js << 'EOF'
+module.exports = {
+  apps: [
+    {
+      name: 'api-gateway',
+      cwd: './backend/api-gateway',
+      script: 'npm',
+      args: 'start',
+      instances: 1
+    },
+    {
+      name: 'nova',
+      cwd: './backend/nova',
+      script: 'npm',
+      args: 'start',
+      instances: 1
+    },
+    {
+      name: 'image-generator',
+      cwd: './backend/image-generator',
+      script: 'npm',
+      args: 'start',
+      instances: 1
+    },
+    {
+      name: 'indus-report',
+      cwd: './backend/indus-report',
+      script: 'npm',
+      args: 'start',
+      instances: 1
+    },
+    {
+      name: 'perfectto',
+      cwd: './backend/perfectto',
+      script: 'npm',
+      args: 'start',
+      instances: 1
+    },
+    {
+      name: 'repro-tool',
+      cwd: './backend/repro-tool',
+      script: 'npm',
+      args: 'start',
+      instances: 1
+    },
+    {
+      name: 'frontend',
+      cwd: './frontend',
+      script: 'npm',
+      args: 'start',
+      instances: 1
+    }
+  ]
+};
+EOF
+
+# Start all services
+pm2 start ecosystem.config.js
+pm2 logs
+```
+
+### Verification
+
+Test the deployment with curl:
+
+```bash
+# Check API Gateway
+curl -X GET http://localhost:5000/api/tools
+
+# Check tool status
+curl -X GET http://localhost:5000/api/tools/nova/status
+
+# Test tool processing
+curl -X POST http://localhost:5000/api/tools/nova/process \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Hello world", "type":"text"}'
+```
+
+Access frontend:
+- **Development**: http://localhost:3000
+- Use test credentials from [TESTING_GUIDE.md](./TESTING_GUIDE.md)
+
+---
+
+## 🚀 Production Deployment
+
+### Frontend Build & Serve
+
+```bash
+cd frontend
+npm run build
+
+# Using Nginx to serve static files
+sudo cp -r build/* /var/www/html/
+
+# Or use serve package
+npx serve -s build -l 5000
+```
+
+### Backend Deployment
+
+#### Option 1: Docker Containers
+```dockerfile
+# Dockerfile for tool services
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --production
+COPY . .
+EXPOSE 5001
+CMD ["npm", "start"]
+```
+
+Build and run:
+```bash
+docker build -t tda-nova .
+docker run -d -p 5001:5001 --name nova tda-nova
+```
+
+#### Option 2: Virtual Machine/Server
+Use systemd service files:
+
+```ini
+# /etc/systemd/system/tda-api-gateway.service
+[Unit]
+Description=TDA API Gateway
+After=network.target
+
+[Service]
+Type=simple
+User=tda-user
+WorkingDirectory=/home/tda-user/AI_Tools/backend/api-gateway
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable tda-api-gateway
+sudo systemctl start tda-api-gateway
+```
+
+#### Option 3: AWS/Cloud Deployment
+- Deploy database to AWS RDS or MongoDB Atlas
+- Use Lambda for serverless tool services
+- Use Elastic Beanstalk or App Engine for API Gateway
+- Host frontend on S3 + CloudFront
+
+---
+
+## 🔒 Security Recommendations
+
+1. **Environment Variables**: Never commit `.env` files; use secrets management
+2. **HTTPS**: Use SSL certificates in production
+3. **API Keys**: Validate API keys on backend (not just client-side)
+4. **CORS**: Configure CORS for specific origins in production
+5. **Rate Limiting**: Add rate limiting middleware to API Gateway
+6. **Database Auth**: Enable MongoDB authentication in production
+7. **Logging**: Implement centralized logging (e.g., ELK stack)
+8. **Monitoring**: Use APM tools like New Relic or DataDog
+
+---
+
+## 📊 Performance Optimization
+
+- **Frontend**: Optimize bundle size with code splitting and lazy loading
+- **Backend**: Use caching (Redis) for frequently accessed data
+- **Database**: Add indexes for common queries
+- **Horizontal Scaling**: Run multiple instances behind load balancer
+- **CDN**: Serve static assets from CDN for faster delivery
+
+---
+
+## 🆚 Adding New Tools
+
+1. Create service folder: `backend/new-tool/`
+2. Copy from existing tool and modify port
+3. Add to `backend/api-gateway/constants.js` tools array
+4. Create React component: `frontend/src/components/tools/new-tool/NewToolInterface.js`
+5. Update `frontend/src/App.js` routing logic
+6. Restart services
+
+---
+
+## 🐛 Troubleshooting
+
+### Port Already in Use
+```bash
+# Find process using port
+lsof -i :5000
+# Kill process
+kill -9 <PID>
+```
+
+### Module Not Found
+```bash
+# Reinstall dependencies
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### MongoDB Connection Error
+```bash
+# Check MongoDB running
+sudo systemctl status mongod
+
+# Start MongoDB
+sudo systemctl start mongod
+```
+
+### CORS Errors
+- Check `backend/api-gateway/index.js` CORS configuration
+- Ensure frontend URL matches allowed origins
+
+---
+
+## 📚 Related Documentation
+
+- [README.md](./README.md) - Quick start guide
+- [PERMISSION_SYSTEM.md](./PERMISSION_SYSTEM.md) - Access control details  
+- [TESTING_GUIDE.md](./TESTING_GUIDE.md) - Test credentials and verification
+- [CHANGES_SUMMARY.md](./CHANGES_SUMMARY.md) - Recent updates and improvements
 
 ## 📝 Troubleshooting
 - If tool inactive, ensure service is running and `health` endpoint returns `{ active: true }`.
