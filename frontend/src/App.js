@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { API, SUPPORT, UI, USER_GROUPS } from './constants';
 import Header from './components/common/Header';
 import LoginModal from './components/common/LoginModal';
@@ -26,7 +26,10 @@ function App() {
   const [userGroups, setUserGroups] = useState([]); // User's groups/lists
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(() => {
+    const storedTheme = localStorage.getItem('theme');
+    return storedTheme === 'dark' ? 'dark' : 'light';
+  });
   const [currentView, setCurrentView] = useState('dashboard');
   const [loginSkipped, setLoginSkipped] = useState(false);
   const [feedbackEmail, setFeedbackEmail] = useState('');
@@ -137,6 +140,9 @@ function App() {
     const encrypted = await encryptString(JSON.stringify(value));
     if (encrypted) {
       localStorage.setItem(key, encrypted);
+      if (key === 'theme' && typeof value === 'string') {
+        localStorage.setItem('theme', value);
+      }
     }
   };
 
@@ -190,9 +196,12 @@ function App() {
     loadSecureState();
   }, []);
 
+  useLayoutEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
   useEffect(() => {
     if (isInitialized) {
-      document.documentElement.setAttribute('data-theme', theme);
       setSecureItem('theme', theme).catch(err => {
         console.warn('Failed to store theme securely', err);
       });
@@ -220,10 +229,30 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
+  const pushHistoryState = (view, selectedToolId = null) => {
+    const url = view === 'dashboard'
+      ? selectedToolId ? `#tool-${selectedToolId}` : '/'
+      : view === 'feedback' ? '#feedback' : '#about';
+    window.history.pushState({ view, selected: selectedToolId }, '', url);
+  };
+
   useEffect(() => {
     const handlePopState = (event) => {
       if (event.state && event.state.view) {
         setCurrentView(event.state.view);
+        if (event.state.selected) {
+          setSelected(prev => {
+            if (prev && prev.id === event.state.selected) return prev;
+            return null;
+          });
+        } else {
+          setSelected(null);
+        }
+      } else {
+        const hash = window.location.hash;
+        if (hash === '#about') setCurrentView('about');
+        else if (hash === '#feedback') setCurrentView('feedback');
+        else setCurrentView('dashboard');
       }
     };
     window.addEventListener('popstate', handlePopState);
@@ -260,6 +289,7 @@ function App() {
     if (isLoading) return;
     setSelected(tool);
     setCurrentView('dashboard');
+    pushHistoryState('dashboard', tool.id);
     setStatusMessage('Checking tool status...');
     setOutput('');
     setLogs([]); // Clear logs when selecting new tool
@@ -491,7 +521,7 @@ function App() {
             feedbackMessage={feedbackMessage}
             setFeedbackMessage={setFeedbackMessage}
           />}
-          {currentView === 'about' && <About user={user} loginSkipped={loginSkipped} />}
+          {currentView === 'about' && <About user={user} loginSkipped={loginSkipped} tools={tools} />}
         </div>
       ) : (
         <div style={{ padding: selected && currentView === 'dashboard' ? 0 : 24, minHeight: 'calc(100vh - 80px)' }}>
@@ -594,7 +624,7 @@ function App() {
             setFeedbackSubject={setFeedbackSubject}
             feedbackMessage={feedbackMessage}
             setFeedbackMessage={setFeedbackMessage}
-          /> : <About />}
+          /> : <About user={user} loginSkipped={loginSkipped} tools={tools} />}
         </div>
       )}
 

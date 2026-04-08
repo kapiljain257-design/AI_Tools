@@ -21,7 +21,7 @@ app.use((req, res, next) => {
   next();
 });
 
-mongoose.connect(config.mongoUri)
+mongoose.connect(config.mongoUri, { serverSelectionTimeoutMS: 3000, connectTimeoutMS: 3000 })
   .then(() => console.info(`[${config.toolId}] Connected to MongoDB`))
   .catch(err => console.warn(`[${config.toolId}] MongoDB connection error (non-blocking): ${err.message}`));
 
@@ -32,6 +32,15 @@ try {
   // Model already defined
   ToolUsage = mongoose.model('ToolUsage');
 }
+
+const logToolUsage = (prompt, result) => {
+  if (mongoose.connection.readyState === 1) {
+    ToolUsage.create({ toolId: config.toolId, prompt, result })
+      .catch(e => console.warn(`[${config.toolId}] Mongo write failed`, e.message));
+  } else {
+    console.warn(`[${config.toolId}] Mongo not ready, skipping usage log`);
+  }
+};
 
 app.get('/health', (req, res) => {
   console.info(`[${config.toolId}] Health check`);
@@ -50,11 +59,7 @@ app.post('/process', async (req, res) => {
     result = `Invalid expression`;
   }
 
-  try {
-    await ToolUsage.create({ toolId: config.toolId, prompt, result });
-  } catch (e) {
-    console.warn(`[${config.toolId}] Mongo write failed`, e.message);
-  }
+  logToolUsage(prompt, result);
 
   res.json({ result });
 });
